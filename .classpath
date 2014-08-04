@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="samples"/>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/graph-core-2.10-1.9.0/graph-core_2.10-1.9.0.jar" sourcepath="lib/graph-core-2.10-1.9.0/graph-core_2.10-1.9.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/GAGAnalysis/lib/graph-core-2.10-1.9.0/graph-core_2.10-1.9.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/scalaz-2.10-7.1.0/scalaz_2.10-7.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/scalaz-2.10-7.1.0/scalaz-core_2.10-7.1.0-SNAPSHOT.jar" sourcepath="lib/scalaz-2.10-7.1.0/scalaz-core_2.10-7.1.0-M6-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/GAGAnalysis/lib/scalaz-2.10-7.1.0/scalaz-core_2.10-7.1.0-M6-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/soot-2.5.0/jasminclasses-2.5.0.jar" sourcepath="lib/soot-2.5.0/jasminsrc-2.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/soot-2.5.0/polyglotclasses-1.3.5.jar" sourcepath="lib/soot-2.5.0/polyglotsrc-1.3.5.jar"/>
+	<classpathentry kind="lib" path="lib/soot-2.5.0/sootclasses-2.5.0.jar" sourcepath="lib/soot-2.5.0/sootsrc-2.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/jung-2.0.1/jung-algorithms-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-2.0.1/jung-visualization-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-2.0.1/jung-graph-impl-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-2.0.1/collections-generic-4.01.jar"/>
+	<classpathentry kind="lib" path="lib/jung-2.0.1/jung-api-2.0.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
