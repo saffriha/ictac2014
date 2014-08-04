@@ -86,7 +86,7 @@ We found that, in the example causing the performance impact, both
 conservative and aggressive compacting lead to the same points-to sets, meaning that
 for all pairs (r1, o1) and (r2, o2) r1 ⊑ r2 implied o1 ⊑ o2 in this example.
 Compared to using no compacting at all, in the most extreme case compacting
-reduced a pointsto-set from 1600 to 200 pairs and reduced the analysis duration
+reduced a points-to set from 1600 to 200 pairs and reduced the analysis duration
 from 302 to 13 seconds.
 
 The eclipse project includes 3 run configurations which run the example project
