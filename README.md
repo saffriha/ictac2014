@@ -1,7 +1,7 @@
 <h1 align="center">Precise Interprocedural Side-Effect Analysis</h1>
 
 <h5 align="center">Manuel Geffken, Hannes Saffrich, and Peter Thiemann<br>
-Universität Freiburg, Germany</h5>
+University of Freiburg, Germany</h5>
 
 <h6 align="center">ICTAC 2014</h6>
 
@@ -82,9 +82,12 @@ the analysis precision.
 (r1, o1) and (r2, o2) to (r2, o1 ⊔ o2) iff r1 ⊑ r2, and hence leads to a
 precision loss if o1 ⋢ o2.
 
-We found that in the example causing the performance impact, that both
+We found that, in the example causing the performance impact, both
 conservative and aggressive compacting lead to the same points-to sets, meaning that
 for all pairs (r1, o1) and (r2, o2) r1 ⊑ r2 implied o1 ⊑ o2 in this example.
+Compared to using no compacting at all, in the most extreme case compacting
+reduced a pointsto-set from 1600 to 200 pairs and reduced the analysis duration
+from 302 to 13 seconds.
 
 The eclipse project includes 3 run configurations which run the example project
 using one of the compacting modes respectively.
@@ -92,7 +95,7 @@ using one of the compacting modes respectively.
 
 ## Sources
 
-Each .scala source file contains a short comment after the import declarations
+Each *.scala* source file contains a short comment after the import declarations
 describing the contained code. This might be helpful when navigating the source
 files the first time.
 
