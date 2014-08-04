@@ -52,8 +52,8 @@ class IntraprocSEAnalysis(graph: DirectedGraph[soot.Unit],
     val stmt = unit.asInstanceOf[soot.jimple.Stmt]
     Stmt.fromJimple(stmt) match {
       case None    =>
-        println("Failed converting jimple stmt " + stmt +
-                " of type" + stmt.getClass.getName + ".")
+//        println("Ignoring jimple stmt " + stmt +
+//                " of type" + stmt.getClass.getName + ".")
       case Some(e) => e match {
         case Assign(l, r, _)   => gen join genWrite(l)
                                   gen join genRead(r)

@@ -10,6 +10,6 @@
 <mapEntry key="[debug]" value="scala.application"/>
 </mapAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="gaganalysis.Main"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;maintest.MainTest&quot;&#10;-cp &quot;${project_loc:GAGAnalysis}/samples&quot;&#10;--pts-compacting=aggressive"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;maintest.MainTest&quot;&#10;-cp &quot;${project_loc:GAGAnalysis}/samples&quot;&#10;--pts-compacting=precise"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="GAGAnalysis"/>
 </launchConfiguration>

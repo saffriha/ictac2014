@@ -55,8 +55,8 @@ object Main {
          . map { s => PtsMap.compactingMode =
              s.substring(s.indexOf("=")+1, s.length).toLowerCase match {
                case "none"         => PtsCompactingMode.None
+               case "precise"      => PtsCompactingMode.Precise   
                case "conservative" => PtsCompactingMode.Conservative
-               case "aggressive"   => PtsCompactingMode.Aggressive
                case s =>
                  println("Unsupported pts-compacting mode specified: " + s)
                  System.exit(1)

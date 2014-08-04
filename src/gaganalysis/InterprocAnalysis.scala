@@ -43,7 +43,7 @@ class InterprocAnalysis(title: String) extends ScalaSceneTransformer {
           if (!m.hasActiveBody) println("Method " + m.getSignature()
                                       + " has no active body. Skipping method.")
           else {
-            println("Method: " + m.getSignature() + ", Body: " + m.getActiveBody)
+            println("Current method: " + m.getSignature()) // + ", Body: " + m.getActiveBody)
             Log.Timer.intraprocAnalysis.start
             Log.onStartIntraproc(m)
             

@@ -56,7 +56,7 @@ case class PtsMap(map: Map[Ref, GAG]) extends GAGMap[Ref](map) {
   override def join(r1: Ref, or1: GAG): Unit =
     PtsMap.compactingMode match {
       case PtsCompactingMode.None => super.join(r1, or1)
-      case PtsCompactingMode.Conservative =>
+      case PtsCompactingMode.Precise =>
         for { (r2@Ref(ol2, f2), or2) <- map } 
           if (r1 <= r2 && or1 <= or2) {
             put(r2, or2)
@@ -68,7 +68,7 @@ case class PtsMap(map: Map[Ref, GAG]) extends GAGMap[Ref](map) {
             return
           }
         put(r1, or1)
-      case PtsCompactingMode.Aggressive =>
+      case PtsCompactingMode.Conservative =>
         for { (r2@Ref(ol2, f2), or2) <- map } 
           if (r1 <= r2) {
             put(r2, or1 + or2)
@@ -92,8 +92,7 @@ trait PtsCompactingMode
 object PtsCompactingMode {
   case object None extends PtsCompactingMode
   case object Conservative extends PtsCompactingMode
-  case object Aggressive extends PtsCompactingMode
-  
+  case object Precise extends PtsCompactingMode
 }
 
 case class PtsEnv(map: Map[VarID, GAG]) extends GAGMap[VarID](map) {
