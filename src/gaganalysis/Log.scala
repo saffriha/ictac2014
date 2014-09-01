@@ -139,7 +139,17 @@ object Log {
                   s.reads.nodes.size.toString,
                   s.writes.nodes.size.toString)
                 }
-                 
+
+    val numMethods = summaries.size
+    val numPureMethods =
+      summaries . values
+                . filter { sum => sum.writes.hasEmptyLang &&
+                                  sum.ptsMap.map.isEmpty }
+                . size
+    val percentPure = (100.0 * numPureMethods) / numMethods
+    addTextRow(numMethods.toString + " methods")
+    addTextRow(numPureMethods.toString + " pure methods")
+    addTextRow(percentPure.toString + "% pure")
   }
 
   def onTransfer(callee: Call, calleeFO: PtsFlowObject, obj: GAG,
