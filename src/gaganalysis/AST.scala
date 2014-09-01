@@ -144,8 +144,6 @@ object Stmt extends AbstractStmtSwitch {
     def handleDefinitionStmt(stmt: DefinitionStmt) = {
       val ctor : (Expr, Expr) => Stmt = Assign(_, _, 
         JType.from(stmt.getLeftOp.getType))
-//        if (stmt.getLeftOp.getType.isInstanceOf[soot.RefType]) JRef
-//        else                                                   JVal)
       
       res = Apply[Option].lift2(ctor) (Expr.fromJimple(stmt.getLeftOp),
                                        Expr.fromJimple(stmt.getRightOp))
@@ -243,7 +241,11 @@ object Expr {
       res = some(Null)
       
     override def caseArrayRef(v: ArrayRef) =
-      res = Expr.fromJimple(v.getBase)
+      Expr.fromJimple(v.getBase) match
+        { case Some(e: VarExpr) => res = some(FieldAccess(e,
+                       Field(FieldID("elements"), SootValuePP(v)),
+                       SootValuePP(v))) }
+//      res = Expr.fromJimple(v.getBase)
       
     override def caseNewExpr(v: NewExpr) = handleAlloc(v)
     override def caseNewArrayExpr(v: NewArrayExpr) = handleAlloc(v)

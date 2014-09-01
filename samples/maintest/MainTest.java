@@ -1,5 +1,6 @@
 package maintest;
 
+import maintest.cases.Arrays;
 import maintest.cases.Globals;
 import maintest.cases.Inheritance;
 import maintest.cases.InterProc;
@@ -11,14 +12,15 @@ import maintest.cases.SimpleCases;
 
 public class MainTest {
 	public static void main(String[] args) {
-		SimpleCases.doAnalysis();
-		Loops.doAnalysis();
-		Null.doAnalysis();
-		Globals.doAnalysis();
-		OOP.doAnalysis();
-		Inheritance.doAnalysis();
-		InterProc.doAnalysis();
-		SideEffects.doAnalysis();
+		Arrays.doAnalysis();
+//		SimpleCases.doAnalysis();
+//		Loops.doAnalysis();
+//		Null.doAnalysis();
+//		Globals.doAnalysis();
+//		OOP.doAnalysis();
+//		Inheritance.doAnalysis();
+//		InterProc.doAnalysis();
+//		SideEffects.doAnalysis();
 	}
 	
 }
