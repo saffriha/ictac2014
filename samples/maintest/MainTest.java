@@ -13,14 +13,14 @@ import maintest.cases.SimpleCases;
 public class MainTest {
 	public static void main(String[] args) {
 		Arrays.doAnalysis();
-//		SimpleCases.doAnalysis();
-//		Loops.doAnalysis();
-//		Null.doAnalysis();
-//		Globals.doAnalysis();
-//		OOP.doAnalysis();
-//		Inheritance.doAnalysis();
-//		InterProc.doAnalysis();
-//		SideEffects.doAnalysis();
+		SimpleCases.doAnalysis();
+		Loops.doAnalysis();
+		Null.doAnalysis();
+		Globals.doAnalysis();
+		OOP.doAnalysis();
+		Inheritance.doAnalysis();
+		InterProc.doAnalysis();
+		SideEffects.doAnalysis();
 	}
 	
 }
