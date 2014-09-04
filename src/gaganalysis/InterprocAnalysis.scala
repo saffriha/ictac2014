@@ -13,7 +13,7 @@ import sootproxy.ScalaSceneTransformer
 
 // This file describes the interprocedural part of our analysis.
 
-class InterprocAnalysis(title: String) extends ScalaSceneTransformer {
+class InterprocAnalysis extends ScalaSceneTransformer {
   val summaries: Map[SootMethod, MethodSummary] = HashMap()
   
   // This method get's called from soot to query our analysis.

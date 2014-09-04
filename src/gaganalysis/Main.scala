@@ -34,7 +34,7 @@ object Main {
     // Create the SceneTransformer of our analysis.
     // A soot SceneTransformer represents a whole program analysis,
     // which get's called once and has access to the whole program term (Scene).
-    val st = new InterprocAnalysis(args.head)
+    val st = new InterprocAnalysis
     
     // Add the SceneTransformer to the whole-program-analysis jimple
     // transformation pack (wjtp), such that the program analysed by
