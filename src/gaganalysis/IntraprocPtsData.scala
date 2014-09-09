@@ -12,16 +12,10 @@ import scala.collection.mutable.HashMap
 // This file describes the data structures used by the intraprocedural
 // points-to analysis.
 
-case class Ref(base: GAG, field: Field) {
-  override def equals(o: Any): Boolean =
-    o.isInstanceOf[Ref] && this === o.asInstanceOf[Ref]
-  def ===(r: Ref): Boolean =
-    (base equals r.base) && (field.id equals r.field.id)
-  override def hashCode: Int =
-    31 * base.hashCode + field.id.hashCode
-  def mayAlias(r: Ref): Boolean = (field.id equals r.field.id) &&
+case class Ref(val base: GAG, val field: Field) {
+  def mayAlias(r: Ref): Boolean = (field.id == r.field.id) &&
                                   !(base disjoint r.base)
-  def <=(r: Ref): Boolean = (field eq r.field) &&
+  def <=(r: Ref): Boolean = (field == r.field) &&
                             (base <= r.base)
 }
 
@@ -33,10 +27,10 @@ abstract class GAGMap[K](map: Map[K, GAG]) {
   def getUnsafe(k: K): GAG = get(k).get
   def entries(): List[(K, GAG)] = map.toList
   def join(k: K, v: GAG): Unit = 
-      map.get(k) match {
-        case Some(v2) => v2 join v
-        case None     => map.put(k, v)
-      }
+    map.get(k) match {
+      case Some(v2) => v2 join v
+      case None     => map.put(k, v)
+    }
   def join(m: GAGMap[K]): Unit = m.entries map { e => this.join(e._1, e._2) }
   def clear = map.clear
 }
@@ -49,8 +43,7 @@ case class PtsMap(map: Map[Ref, GAG]) extends GAGMap[Ref](map) {
   def compact(): Unit = {
     val e = entries
     clear
-    for { (r1, or1) <- e }
-      join(r1, or1)
+    e map (join _).tupled
   }
   
   override def join(r1: Ref, or1: GAG): Unit =
@@ -63,8 +56,8 @@ case class PtsMap(map: Map[Ref, GAG]) extends GAGMap[Ref](map) {
             return
           }
           else if (r2 <= r1 && or2 <= or1) {
-            map.remove(r2);
-            put(r1, or1);
+            map remove r2
+            put(r1, or1)
             return
           }
         put(r1, or1)

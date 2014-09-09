@@ -16,7 +16,8 @@ import scalax.collection.GraphPredef.nodeSetToSeq
 import scalax.collection.GraphPredef.predicateToNodePredicate
 import scalax.collection.mutable.Graph
 import scalax.collection.mutable.Graph.empty$default$2
-import scalaz.Scalaz._
+import scalaz.Scalaz
+import Scalaz._
 
 // This file defines the abstract domain of Generalized Access Graphs (GAGs),
 // which we use to model the heap in both the intraprocedural points-to and
@@ -25,39 +26,21 @@ import scalaz.Scalaz._
 trait Node {
   def id(): Any
   def pp(): Any
-  override def toString(): String = "<" + id + ", " + pp + ">"
+  override def toString(): String = id + "@" + pp
 }
 
-class NodeImpl(_id: Any, _pp: Any) extends Node {
+case class NodeImpl(val _id: Any, val _pp: Any) extends Node {
   override def id() = _id
   override def pp() = _pp
-  override def toString(): String = id + "@" + pp
-  override def equals(o: Any): Boolean =
-    o.isInstanceOf[NodeImpl] && {
-      val n = o.asInstanceOf[NodeImpl]
-      n.id.equals(id) && n.pp.equals(pp)
-    }
-  override def hashCode(): Int = 31 * id.hashCode() + pp.hashCode()
 }
 
-class GAG(val graph: Graph[Node, DiEdge],
-          val roots: Set[Node],
-          val exits: Set[Node]) {
+case class GAG(val graph: Graph[Node, DiEdge],
+               val roots: Set[Node],
+               val exits: Set[Node]) {
   type Edge = (Node, Node)
   type NodeT = graph.NodeT
   
   def copy(): GAG = new GAG(graph.clone, roots.clone, exits.clone)
-
-  def ===(gag: GAG): Boolean = 
-    (graph equals gag.graph) &&
-    (roots equals gag.roots) &&
-    (exits equals gag.exits)
-    
-  override def equals(o: Any): Boolean =
-    o.isInstanceOf[GAG] && (this === o.asInstanceOf[GAG])
-  
-  override def hashCode(): Int =
-    31 * (31 * graph.hashCode + roots.hashCode) + exits.hashCode
 
   def analysis[FO](inToOut: (Node, FO) => FO,
                    join: (FO, FO) => FO,
@@ -75,19 +58,22 @@ class GAG(val graph: Graph[Node, DiEdge],
                    init: (Map[Node, FO], Map[Node, FO]),
                    startFrom: Iterable[Node]
   ): (Map[Node, FO], Map[Node, FO]) = {
-    def join2(fo: FO, fos: Iterable[FO]) = fos.foldLeft(fo)(join)
     val q = Queue() ++= startFrom
-    val in: Map[Node, FO] = init._1.clone
-    val out: Map[Node, FO] = init._2.clone
+    val initIn = init._1
+    val initOut = init._2
+    val in: Map[Node, FO] = HashMap()
+    val out: Map[Node, FO] = HashMap()
     while (!q.isEmpty) {
       val n = q.dequeue
-      val nIn = join2(in.get(n).get,
-                      preds(n) map { out.get(_).get })
-      in.put(n, nIn)
-      val nOut = inToOut(n, nIn)
-      if (! (Some(nOut) equals out.get(n))) {
-        out.put(n, nOut)
-        q ++= (succs(n) map {_.value} filter { n => !(q contains n) })
+      val predOuts = preds(n) map { p => out.get(p) | initOut.get(p).get }
+      val newIn = (predOuts reduceOption join) | initIn.get(n).get
+      in.put(n, newIn)
+      val newOut = inToOut(n, newIn)
+      (out get n) match {
+        case Some(oldOut) if oldOut == newOut => { }
+        case _ =>
+          out.put(n, newOut)
+          q ++= succs(n) map { _.value } filter { n => !(q contains n) }
       }
     }
     (in, out)
@@ -213,14 +199,11 @@ class GAG(val graph: Graph[Node, DiEdge],
 
     var nodeStack: List[(Node, Node)] = nil
 
-    for {
-      r1 <- this.roots;
-      r2 <- ag.roots;
-      if r1.id equals r2.id
-    } {
-      cns.get(r1).get.add(r2)
-      nodeStack :+ (r1, r2)
-    }
+    for { r1 <- this.roots;
+          r2 <- ag.roots;
+          if r1.id == r2.id }
+        { cns.get(r1).get.add(r2)
+          nodeStack :+ (r1, r2) }
 
     while (!nodeStack.isEmpty) {
       val addMap: Map[Node, Set[Node]] = new HashMap
@@ -231,7 +214,7 @@ class GAG(val graph: Graph[Node, DiEdge],
       for (
         s1 <- this.succs(n1);
         s2 <- ag.succs(n2);
-        if (s1.id equals s2.id) && !(cns.get(s1).get contains s2)
+        if (s1.id == s2.id) && !(cns.get(s1).get contains s2)
       ) {
         addMap.getOrElseUpdate(s1, new HashSet) add s2
         nodeStack :+ (s1, s2);
@@ -286,8 +269,8 @@ class GAG(val graph: Graph[Node, DiEdge],
         case e :: es => {
           marked add e;
           if (es != nil)
-            queue = (n :: (queue filter (x => !(x equals n))))
-          queue = (e._2 :: (queue filter (x => !(x equals e._2))))
+            queue = n :: (queue filter {_ != n})
+          queue = e._2 :: (queue filter {_ != e._2})
         }
       }
     }

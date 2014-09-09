@@ -35,14 +35,14 @@ class IntraprocSEAnalysis(graph: DirectedGraph[soot.Unit],
     out.clear
     out.join(in1)
     out.join(in2)
-//    Log.curSELog.onJoin(in1, in2, out)
+//    Log.v.curSELog.onJoin(in1, in2, out)
   }
 
   // Compute out-objects from in-objects.
   override def flowThrough(in: SEFlowObject,
                            unit: soot.Unit,
                            out: SEFlowObject) = {
-//    Log.Timer.seCfgNode.start
+//    Log.v.Timer.seCfgNode.start
     
     val gen      = SEFlowObject.bottom
     val killWith = SEFlowObject.bottom
@@ -67,7 +67,7 @@ class IntraprocSEAnalysis(graph: DirectedGraph[soot.Unit],
     def handleCall(c: Call): SEFlowObject = {
 	  val effects =
 	    for { m <- Analysis.calleesOf(unit);
-              if m.hasActiveBody() && (m.getName equals c.method.getName) }
+              if m.hasActiveBody() && (m.getName == c.method.getName) }
         yield {
           val calleeSum = summaries.get(m).get
           SEFlowObject(Analysis.transo(c, ptsIn, calleeSum.reads),
@@ -96,8 +96,8 @@ class IntraprocSEAnalysis(graph: DirectedGraph[soot.Unit],
     out join in
     out join gen
     
-//    Log.curSELog.onNode(stmt, gen)
-//    Log.Timer.seCfgNode.stop
+    Log.v.curSELog.onNode(stmt, gen)
+//    Log.v.Timer.seCfgNode.stop
   }
 
   // Describes how the contents of one flow object can be assigned to another.

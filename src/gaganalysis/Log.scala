@@ -22,6 +22,13 @@ import scala.swing.TabbedPane.Page
 import java.util.Date
 import java.util.Calendar
 import scala.collection.mutable.HashMap
+import java.io.FileWriter
+import java.io.PrintWriter
+import java.text.DateFormat
+import java.util.Locale
+import soot.options.Options
+import soot.Scene
+import java.text.SimpleDateFormat
 
 // This file contains procedures for logging, profiling and statistics
 // visualization.
@@ -30,8 +37,8 @@ case class CountingTimer() {
   var intervals: List[(Date, Date)] = List()
   var startTime: Date = null
 
-  def start = startTime = getTime
-  def stop = intervals = (startTime, getTime) +: intervals
+  def start = startTime = IO.now
+  def stop = intervals = (startTime, IO.now) +: intervals
   def time[T](s: => T): T = { start; val x = s; stop; x }
 
   def deltas: List[Int] = intervals map { case (d1, d2) => (d2.getTime - d1.getTime).toInt }
@@ -46,11 +53,11 @@ case class CountingTimer() {
   def maxSec: Option[Float] = if (deltasSec.isEmpty) None else Some(deltasSec.max)
   def minSec: Option[Float] = if (deltasSec.isEmpty) None else Some(deltasSec.min)
   def avgSec: Option[Float] = if (deltasSec.isEmpty) None else Some(sumSec / size)
-  
-  def getTime: Date = Calendar.getInstance.getTime
 }
 
-object Log {
+object Log { var v = new Log2(true) }
+  
+class Log2(val showWindow: Boolean) {
   object Timer {
     val total = CountingTimer()
     val interprocAnalysis = CountingTimer()
@@ -63,7 +70,7 @@ object Log {
     val profiling = CountingTimer()
     val astcreation = CountingTimer()
   }
-//  val t = new TabbedPane
+  val t = new TabbedPane
   
   var ptsLogs = HashMap[SootMethod, PtsLog]()
   var curPtsLog: PtsLog = null
@@ -90,12 +97,36 @@ object Log {
           new Page("SE Flow Logs", showLogs(seLogs)),
           new Page("Timers", timerLog),
           new Page("Set Sizes", new ScrollPane(showSetSizes(m)))
-//          , new Page("Transfers", t)
+          , new Page("Transfers", t)
         )
       }
-    } . visible = true
+    } . visible = showWindow
+    logToFile
     Timer.profiling.stop
   }
+  
+  object Stats {
+    var numMethods: Int = 0
+    var numPureMethods: Int = 0
+    var percentPureMethods: Double = 0.0
+  }
+
+  def logToFile = IO.writeToFile(
+    "/home/d0lphchrist/benchmarks/" + IO.timestamp + " " +
+      Scene.v.getMainClass.getName,
+    "Benchmark:      " + Scene.v.getMainClass.getName + "\n" +
+    "Compacting:     " + PtsMap.compactingMode + "\n" +
+    "# Methods:      " + Stats.numMethods + "\n" +
+    "# Pure:         " + Stats.numPureMethods + "\n" +
+    "% Pure:         " + Stats.percentPureMethods + "\n" +
+    "Total time:     " + Timer.total.sumSec + "\n" +
+    "Interproc time: " + Timer.interprocAnalysis.sumSec + "\n" +
+    "Pts time:       " + Timer.ptsAnalysis.sumSec + "\n" +
+    "SE time:        " + Timer.seAnalysis.sumSec + "\n" +
+    "Profiling time: " + Timer.profiling.sumSec + "\n" +
+    "# Interproc:    " + Timer.interprocAnalysis.size + "\n" +
+    "# Intraproc:    " + Timer.intraprocAnalysis.size + "\n" +
+    "")
   
   def showSetSizes(summaries: Map[SootMethod, MethodSummary]) = new GridBagPanel {
     def gridConstraints(x: Int, y: Int) = {
@@ -150,15 +181,18 @@ object Log {
     addTextRow(numMethods.toString + " methods")
     addTextRow(numPureMethods.toString + " pure methods")
     addTextRow(percentPure.toString + "% pure")
+    Stats.numMethods = numMethods
+    Stats.numPureMethods= numPureMethods
+    Stats.percentPureMethods= percentPure
   }
 
   def onTransfer(callee: Call, calleeFO: PtsFlowObject, obj: GAG,
                  in: Map[Node, GAG], out: Map[Node, GAG], result: GAG) = {
-//    Timer.profiling.start
-//    t.pages += new Page(callee.method.getName,
-//                        new ScrollPane(fromTrans(callee, calleeFO, obj, in, out,
-//                                                 result)))
-//    Timer.profiling.stop
+    Timer.profiling.start
+    t.pages += new Page(callee.method.getName,
+                        new ScrollPane(fromTrans(callee, calleeFO, obj, in, out,
+                                                 result)))
+    Timer.profiling.stop
   }
   
   def onStartIntraproc(m: SootMethod) = {
@@ -430,4 +464,24 @@ object Log {
   }
 }
 
+object IO {
+  def using[A <: {def close(): Unit}, B](param: A)(f: A => B): B =
+  try { f(param) } finally { param.close() }
 
+  def writeToFile(fileName:String, data:String) = 
+    using (new FileWriter(fileName)) {
+      fileWriter => fileWriter.write(data)
+    }
+
+  def appendToFile(fileName:String, textData:String) =
+    using (new FileWriter(fileName, true)){ 
+      fileWriter => using (new PrintWriter(fileWriter)) {
+        printWriter => printWriter.println(textData)
+      }
+    }
+  
+  def now: Date = Calendar.getInstance.getTime
+  
+  def timestamp: String =
+    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") format now
+}

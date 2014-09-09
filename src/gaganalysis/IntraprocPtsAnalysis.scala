@@ -79,7 +79,7 @@ class IntraprocPtsAnalysis(graph: DirectedGraph[soot.Unit],
     def handleCall(c: Call): GAG = {
 	  val objs =
 	    for { m <- Analysis.calleesOf(unit);
-              if m.hasActiveBody() && (m.getName equals c.method.getName) }
+              if m.hasActiveBody() && (m.getName == c.method.getName) }
         yield {
           val calleeSum = summaries.get(m).get
           
@@ -106,7 +106,7 @@ class IntraprocPtsAnalysis(graph: DirectedGraph[soot.Unit],
     out.map join gen.map
     out.map put  killWith.map
     
-//    Log.curPtsLog.onNode(stmt, gen, killWith)
+    Log.v.curPtsLog.onNode(stmt, gen, killWith)
 //    Log.Timer.ptsCfgNode.stop
   }
 

@@ -23,7 +23,7 @@ object Main {
   def main(args: Array[String]) {
     if (args.isEmpty) { println(usage); System.exit(1); }
     
-    Log.Timer.total.start
+    Log.v.Timer.total.start
     
     // Prepare the soot options for our analysis.
     setOptions

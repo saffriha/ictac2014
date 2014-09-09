@@ -22,44 +22,44 @@ class InterprocAnalysis extends ScalaSceneTransformer {
   // soot's Scene.v() Java-style singleton.
   override def internalTransform(phaseName: String) = {
     // Create an SCC Graph of soot's call graph.
-    Log.Timer.sccGraphConstruction.start
-    val sccGraph: Graph[SCC[SootMethod], DiEdge] =
+    Log.v.Timer.sccGraphConstruction.start
+    val sccGraph: Graph[SCC, DiEdge] =
       SCCCallGraph.fromSoot(Scene.v.getCallGraph, Scene.v.getMainMethod)
-    Log.Timer.sccGraphConstruction.stop
+    Log.v.Timer.sccGraphConstruction.stop
       
     // Initialize the method summaries of all methods to bottom.
-    val methods = sccGraph.nodes.flatten(_.nodes)
+    val methods = sccGraph.nodes.toList.flatten(_.nodes.toList) sortBy { _.getSignature }
     methods map { summaries.put(_, MethodSummary.bottom) }
 
     // Traverse the SCC graph bottom-up and compute for each SCC the
     // fixpoint of method summaries for the contained methods.
-    SCCCallGraph.breadthFirstBackTraversal(sccGraph, onSCC)
-    def onSCC(scc: SCC[SootMethod]) = {
-      var changed = false
-      do {
-        changed = false
-        Log.Timer.interprocAnalysis.start
-        for (m <- scc.nodes) yield {
+    SCCCallGraph.topologicalTraversal(sccGraph, onSCC)
+    
+    def onSCC(scc: SCC): Unit = {
+      while (true) {
+        var changed = false
+        Log.v.Timer.interprocAnalysis.start
+        for (m <- scc.nodes) {
           if (!m.hasActiveBody) println("Method " + m.getSignature()
                                       + " has no active body. Skipping method.")
           else {
             println("Current method: " + m.getSignature()) // + ", Body: " + m.getActiveBody)
-            Log.Timer.intraprocAnalysis.start
-            Log.onStartIntraproc(m)
+            Log.v.Timer.intraprocAnalysis.start
+            Log.v.onStartIntraproc(m)
             
             val body = m.getActiveBody
             val summary = summaries.get(m).get
             val cfg: UnitGraph = new BriefUnitGraph(body)
 
             // Apply Points-to Analysis.
-            Log.Timer.ptsAnalysis.start
+            Log.v.Timer.ptsAnalysis.start
             val ptsAnalysis = new IntraprocPtsAnalysis(cfg, body, summaries)
-            Log.Timer.ptsAnalysis.stop
+            Log.v.Timer.ptsAnalysis.stop
 
             // Apply Side Effect Analysis.
-            Log.Timer.seAnalysis.start
+            Log.v.Timer.seAnalysis.start
             val seAnalysis = new IntraprocSEAnalysis(cfg, body, ptsAnalysis, summaries)
-            Log.Timer.seAnalysis.stop
+            Log.v.Timer.seAnalysis.stop
             
             // Combine analysis results to new method summary.
             val newSummary = MethodSummary(
@@ -69,20 +69,20 @@ class InterprocAnalysis extends ScalaSceneTransformer {
                 
             // If the summary has changed, update the summary and queue another
             // iteration of analyses for the current SCC.
-            if (!(summary equals newSummary)) {
+            if (summary != newSummary) {
               summaries.put(m, newSummary)
               changed = true
             }
             
-            Log.Timer.intraprocAnalysis.stop
+            Log.v.Timer.intraprocAnalysis.stop
           }
         }
-        Log.Timer.interprocAnalysis.stop
+        Log.v.Timer.interprocAnalysis.stop
+        if (!changed) return
       }
-      while (changed)
     }
     
-    Log.Timer.total.stop
-    Log.finished(summaries)
+    Log.v.Timer.total.stop
+    Log.v.finished(summaries)
   }
 }

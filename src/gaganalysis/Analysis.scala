@@ -46,13 +46,13 @@ object Analysis {
                                                   n.pp.asInstanceOf[PP]))
         }
       }
-      def join(gag1: GAG, gag2: GAG): GAG = { gag1 join gag2; gag1 }
+      def join(g1: GAG, g2: GAG): GAG = { g1 join g2 }
     }
     val (inX, outX) =
       obj.analysis(FO.inToOut(_,_), FO.join(_,_), GAG.bottom, obj.roots)
       
     val g = GAG.join(outX filter {obj hasExit _._1} map {_._2})
-    Log.onTransfer(call, calleeIn, obj, inX, outX, g)
+//    Log.v.onTransfer(call, calleeIn, obj, inX, outX, g)
     g
   }
 

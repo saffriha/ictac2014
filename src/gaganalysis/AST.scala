@@ -112,8 +112,8 @@ object PPPrinter {
   var pps: List[Any] = Nil
   def register(a: Any) = if (!(pps contains a)) pps ::= a
   def rep(a: Any): String =
-    pps . zip(pps.indices)
-        . find { _._1 equals a }
+    pps . zip(pps.indices.reverse)
+        . find { _._1 == a }
         . map { _._2.toString }
         . getOrElse("[unregistered program point]")
 }
@@ -124,7 +124,7 @@ case class Field(id: ID, pp: PP)
 
 object Stmt extends AbstractStmtSwitch {
   def fromJimple(s: soot.jimple.Stmt): Option[Stmt] = {
-    Log.Timer.astcreation time { StmtSwitch.fromJimple(s) }
+    Log.v.Timer.astcreation time { StmtSwitch.fromJimple(s) }
   }
   
   object StmtSwitch extends AbstractStmtSwitch {

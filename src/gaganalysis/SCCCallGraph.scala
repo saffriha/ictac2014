@@ -16,10 +16,10 @@ import scala.collection.mutable.Queue
 
 object SCCCallGraph {
   def fromSoot(cg: CallGraph,
-               rootMethod: SootMethod): SCCGraph[SootMethod] = {
+               rootMethod: SootMethod): SCCGraph = {
     val filter = new SootMethodFilter() {
       override def want(m: SootMethod): Boolean =
-             !m.getName.equals("<clinit>")
+             (m.getName != "<clinit>")
 //            && !m.isJavaLibraryMethod()
 //              && !m.getName().equals("equals")
 //              && !m.getName().equals("hashCode")
@@ -34,24 +34,17 @@ object SCCCallGraph {
     SCCGraph.fromSootGraph(dcg.asInstanceOf[DirectedGraph[SootMethod]])
   }
   
-  def breadthFirstBackTraversal(g: SCCGraph[SootMethod],
-                                f: SCC[SootMethod] => Unit) = {
-    val exits = g.nodes filter { _.outDegree == 0 }
-    println("Exits: " + exits)
-    println("Graph: " + g)
-    val visited = Set[g.NodeT]()
-    val q = Queue() ++= exits
-    while (!q.isEmpty) {
-      val n = q.dequeue
-      f(n)
-      q ++= (n.inNeighbors filter { !visited.contains(_) })
-      visited ++= n.inNeighbors
-    }
+  def topologicalTraversal(g: SCCGraph, f: SCC => Unit) = {
+    val unprocessed = g.nodes.clone
+    while (!unprocessed.isEmpty)
+      unprocessed
+        . filter { scc => (scc.outNeighbors intersect unprocessed).isEmpty }
+        . map    { scc => f(scc); unprocessed -= scc }
   }
   
-  def depthFirstTraversal(g: SCCGraph[SootMethod],
-                          onEntry: SCC[SootMethod] => Unit,
-                          onExit:  SCC[SootMethod] => Unit) = {
+  def depthFirstTraversal(g: SCCGraph,
+                          onEntry: SCC => Unit,
+                          onExit:  SCC => Unit) = {
     def f(n: g.NodeT): Unit = { onEntry(n); n.outNeighbors map f; onExit(n) }
     g.nodes filter { _.inDegree == 0 } map f
   }
